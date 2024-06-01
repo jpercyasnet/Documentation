@@ -1,1 +1,24 @@
 Create BluRay Video
+OVERVIEW
+Creating Video (DVD & BLU-RAY) from pictures & video taken on our trips.
+The assumption is that everything is in chronological order. Video is inserted in the appropriate place in pictures.
+Sometime allowances must be made to maintain flow and importance of some of the pictures. Some individuals would prefer showing pictures then video, while others visa versa.
+
+Having one camera makes it easy to put pictures in the right order. However that is not always the case.
+
+Put your pictures in separate folders for each day. Within that folder another folder for each camera. also separate your video from your pictures.
+
+The advantage of using Kdenlive is being able create a set of slides from a folder. Other video editors require you to insert each picture.
+Also, creating the correct mp4 file for bluray conversion with compression without loss of quality.
+Kdenlive custom Bluray option changes sound to ac3
+Plan your bluray to determine each 1-6 chapters (using Nero templates limit it to 6 chapters). Each mp4 file will be a chapter.
+For DVD size files to share, use Kdenlive custom Bluray option, but change dimensions to 720x480 and 100% quality. Also change name (add dvd in name) to prevent overwriting.
+However, the folder pictures need to be organized and formatted.
+
+The use of Nero to create DVD & BLURAY is nice & inexpensive. However, modification is necessary. The DVD quality will start to diminish if longer than 1.5 hours.
+The BLURAY can be of high quality if created specially and you keep it under about 2.5 hours. 
+
+Under Nero, determine your chapters. Based on your chose of templates. Keep to one page (4-6 chapters).
+
+
+
