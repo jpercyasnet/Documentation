@@ -34,6 +34,37 @@ convert all pictures to .jpg  (rename .jpeg to .jpg)
 
 if just one camera, no additional changes.
 
-if facebook pictures or other pictures with no exif data, need to rename them in the format yyyy_mm_dd_nnn_xxxxxxxxx.jpg.
+if one folder with facebook pictures or other pictures with no exif data, need to rename them in the format yyyy_mm_dd_nnn_xxxxxxxxx.jpg.
 to reduce this effort, just rename one picture and put it in a new folder (ie merge1).
 use program mergeinto.. to merge the remaining pictures in the right order.
+
+multiple picture/camera folders:
+  two folders at time.
+     no exif and exif
+        convert exif using program convonedir
+        use program mergeinto.. to merge no exif folder into new folder created by convonedir
+     both exif
+        use program mergetwodir.. to merge the two folders.
+     no exif but of the format yyyyyyyy_mm_dd_nnn_xxxxxxxxx.jpg, can use mergetwodir..
+
+after completing the above, so the pictures are in chronological order, execute program photorot1080
+  photo correction:
+      this converts pictures with exif data that is not 1 to 1.
+  individual photos:
+      this executes indivphoto which let you review the pictures to correct them rotationally.
+  convert 1080:
+      this converts the pictures to 1920x1080 with black background to fill in.
+
+STEP TWO - MERGE PICTURES AND VIDEO
+  use kdenlive to merge pictures to video. Keep videos under 40 minutes.
+  render as .mp4 with audio converted to ac3.
+
+STEP THREE - CREATE BLU RAY
+  use nero video editor create a movie for each .mp4 file
+  crop each video to 30 seconds.
+  create a blu ray output to harddrive.
+  use tsMuxer to convert each mp4 to blu ray folder
+  merge tsMuxer folders into nero blu ray folder.
+
+
+ 
