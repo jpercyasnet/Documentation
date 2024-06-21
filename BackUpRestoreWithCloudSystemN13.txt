@@ -1,5 +1,4 @@
-﻿Current Drives:
-QUARTERLY BACKUP 
+﻿QUARTERLY BACKUP 
 run Dir /s > filelistyyyymmdd.txt
 backup computers using freefilesync (FFS)
 		compare file size
