@@ -336,7 +336,11 @@ code, filename, hdref, hddir, hdsize, hddate, hdmd5sum, bkref, bkdir, bkdate
     no backup
     excluded
  
-
+COPY HD FILES IN ARE FOR BACKUP
+taking the above outputs (no backup and only 1 backup)
+and run the RUST-ICED program hdcopy4bkup
+input: no backup or only 1 backup
+output: directory to store copy of file
 
 OPTION OLD WITH CDTREE:
 
