@@ -289,7 +289,53 @@ Size of original hdinit01 plus hdwindowsC should equal size of hdinit.
 
 REPEAT STEPS B THROUGH E FOR ALL LISTS.
 
+HARDDRIVE DB EVALUATION WITH BACKUP DATABASE.
+A. Need 2 backups of everything
+B. HD but no backup
+C. Bkup but no HD
+D. Bkup & HD not on cloud
+E. Reduce redundancy 
+F. All pictures in Pictures 
+G. All video in Video
+H. Videos: hdlist of production, misc. pics, .mp4, .nvc, .kdenlive, HDshort
+I. Backups: bkmd5sum, remove redundancy for pics & video
+J. Scan HD not in Backups - export csv HD
+K. Scan Backup not HD - export csv Backup 
+L. Create list of types not needed: .dll, .exe, .bin, etc.
 
+Eval HD database in Backup database
+items: B. & J.
+
+create csv with vertical bar separator from harddrive database
+Execute:
+          sqlite3 hdinit.db3  < dump.sql 2> out.txt
+
+where  dump.sql is
+
+    .headers on 
+    .mode csv
+    .separator | 
+    .output hdinit.csv 
+    select * from harddrive;
+    .quit
+
+run program see if exclude; search md5sum; equal: name & size, notate date difference
+
+reads hdinit.csv and calls bkup database to see if it is backed up.
+example:
+./target/release/bkhddbcomp01 bk20240531061717.db3 hdinit.csv exclude.excfile nnnn
+   where nnnn is an optional input to read the hdinit.csv starting at nnnn row
+
+inputs:
+backup db, hd csv, exclude list, starting row (optional)
+
+outputs:
+code, filename, hdref, hddir, hdsize, hddate, hdmd5sum, bkref, bkdir, bkdate
+    more than 1 backup
+    only 1 backup
+    no backup
+    excluded
+ 
 
 
 OPTION OLD WITH CDTREE:
