@@ -306,6 +306,7 @@ L. Create list of types not needed: .dll, .exe, .bin, etc.
 Eval HD database in Backup database
 items: B. & J.
 
+STEP 1
 create csv with vertical bar separator from harddrive database
 Execute:
           sqlite3 hdinit.db3  < dump.sql 2> out.txt
@@ -319,6 +320,7 @@ where  dump.sql is
     select * from harddrive;
     .quit
 
+*************************************************************************
 run program see if exclude; search md5sum; equal: name & size, notate date difference
 
 reads hdinit.csv and calls bkup database to see if it is backed up.
@@ -335,12 +337,65 @@ code, filename, hdref, hddir, hdsize, hddate, hdmd5sum, bkref, bkdir, bkdate
     only 1 backup
     no backup
     excluded
- 
+
+THE RUNNING OF bkhddbcomp01 WAS VERY SLOW BECAUSE OF THE DATABASE CALLS.
+************************************************************************* 
+
+STEP 2
+ create csv with vertical bar separator from backup database
+Execute:
+
+      sqlite3 bk20240531061717.db3  < dumpdb.sql 2> out.txt
+
+where  dumpdb.sql is
+
+    .headers on 
+    .mode csv
+    .separator | 
+    .output bkfile.csv 
+    select * from blubackup;
+    .quit
+
+STEP 3
+sort the bkfile.csv by the md4sum value high to low so the header is at the top.
+sort --field-separator='|' --key=6r --output=bkfilesorted.csv < bkfile.csv
+
+STEP 4
+sort the hdinit.csv by the md4sum value high to low so the header is at the top.
+sort --field-separator='|' --key=6r --output=hdinitsorted.csv < hdinit.csv
+
+STEP 5
+reads hdinitSORTED.csv and bkhdflatcomp01 to see if it is backed up.
+example:
+./target/release/bkhdflatcomp01 bkfilesorted.csv hdinitsorted.csv exclude.excfile nnnn
+   where nnnn is an optional input to read the hdinitsorted.csv starting at nnnn row
+runs extremely fast.
+inputs:
+sorted backup csv, sorted hd csv, exclude list, starting row (optional)
+
+outputs:
+hdref, filename, hddir, hdsize, hddate, hdmd5sum, line number
+    more than 1 backup
+    only 1 backup
+    no backup
+    excluded
+
+STEP 5
+sort the output by hdref (first column):
+sort --field-separator='|' --key=1 --output=nobkup02sorted.neout < nobkup02.neout
+
+STEP 6 
+create separate files for each hdref.
+
+STEP 7
 COPY HD FILES IN ARE FOR BACKUP
-taking the above outputs (no backup and only 1 backup)
+taking the above hdref files (no backup and only 1 backup)
 and run the RUST-ICED program hdcopy4bkup
 input: no backup or only 1 backup
 output: directory to store copy of file
+
+
+
 
 OPTION OLD WITH CDTREE:
 
