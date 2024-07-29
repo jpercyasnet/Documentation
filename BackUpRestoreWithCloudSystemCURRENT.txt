@@ -1,0 +1,338 @@
+﻿QUARTERLY BACKUP 
+run Dir /s > filelistyyyymmdd.txt
+backup computers using freefilesync (FFS)
+		compare file size
+		export filelist.csv before update
+		update
+		Ely onto 3tb drive 
+		John onto 6tba drive
+copy Ely files since last bluray backup to Acer with FFS
+copy John files since last bluray backup to Acer with FFS.
+duplicate delete John files.
+duplicate delete Ely with John
+backup to bluray
+copy backup to cloud
+
+UPDATE BACKUP DATABASE:
+
+STEP 1
+start running RUST-ICED PROGRAM bkmd5sum
+	load the bluray disc
+	confirm that internal matches handwritten label and it is in the backup disc database
+	the output list is used to update the backup disc database: bkyyyymmddnn.list
+
+STEP 2
+create a temporary database using the output list (you can concat them to reduce the number of update runs): bkyyyymmddnn.list
+Execute:
+	sqlite3 bkyyyymmddnn.db3 < importbkyyyymmddnn.sql 2> bkyyyymmddnn.txt
+
+		where  importbkyyyymmddnn.sql is
+
+			CREATE TABLE blubackup (
+				filename  TEXT NOT NULL,
+				filesize INTEGER NOT NULL,
+				filedate TEXT NOT NULL,
+				dirname  TEXT NOT NULL,
+				refname   TEXT NOT NULL,
+				md5sum TEXT,
+				locations TEXT ,
+				notes TEXT ,
+				PRIMARY KEY (refname, filename, dirname, filesize));
+			.separator |
+			.import bkyyyymmddnn.list blubackup
+
+STEP 3
+DUMP THE Temporary database(s)
+Execute: 
+
+	sqlite3 bkyyyymmddnn.db3 .dump > bkyyyymmddnn.sql
+
+STEP 4
+edit each bkyyyymmddnn.sql do a find
+
+blubackup
+
+and replace all with 
+
+blubackup(filename, filesize, filedate, dirname, refname, md5sum, locations, notes)
+
+Since the table is already created, you can delete the create table section at the top.
+
+the original database table was defined in a different order.
+
+STEP 5
+make a copy of the current backup database i.e. bkinit.db3
+	Execute:
+
+	cp -p bkinit.db3 bkinit01.db3
+
+STEP 6
+insert files into main db
+	Execute for all temporary databases created:
+
+	sqlite3 bkinit.db3 < bkyyyymmddnn.sql 2> bkyyyymmddnnsql.txt
+
+ignore error of: table blubackup already exists.
+
+Size of original bkinit01 plus bkyyyymmddnn should equal size of bkinit.
+
+No additional steps since the listings already have the md5sum value.
+
+
+
+HARDDRIVE DATABASE EVALUATION and MAINTAINING
+using hdmd5sum create md5sum listing for all disks.
+Backup files to harddrive and cloud.
+
+STEP A
+Start with largest file and create database.
+Execute: 
+
+      sqlite3 hdinit.db3 < importhd6tbaJohnComputer.sql 2> hdinitout.txt
+
+where importhd6tbaJohnComputer.sql is
+
+CREATE TABLE harddrive (
+            filename  TEXT NOT NULL,
+            filesize INTEGER NOT NULL,
+            filedate TEXT NOT NULL,
+            dirname  TEXT NOT NULL,
+            refname   TEXT NOT NULL,
+            md5sum TEXT ,
+            locations TEXT ,
+            notes TEXT ,
+            PRIMARY KEY (refname, filename, dirname, filesize));
+.separator |
+.import hd6tbaJohnComputer.list harddrive
+
+STEP B
+next file and create temporary file
+Execute: 
+
+      sqlite3 hdwindowsC.db3 < importhdwindowsC.sql 2> hdwindowsCout.txt
+
+where importhdwindowsC.sql is
+
+CREATE TABLE harddrive (
+            filename  TEXT NOT NULL,
+            filesize INTEGER NOT NULL,
+            filedate TEXT NOT NULL,
+            dirname  TEXT NOT NULL,
+            refname   TEXT NOT NULL,
+            md5sum TEXT ,
+            locations TEXT ,
+            notes TEXT ,
+            PRIMARY KEY (refname, filename, dirname, filesize));
+.separator |
+.import hhdwindowsC .list harddrive
+
+STEP C
+DUMP THE Temporary db
+Execute: 
+
+      sqlite3 hdwindowsC.db3 .dump > dumphdwindowsC.sql
+
+STEP D
+make a copy of hdinit.db3
+Execute:
+
+      cp -p hdinit.db3 hdinit01.db3
+
+STEP E
+insert files into main db
+Execute:
+
+      sqlite3 hdinit.db3 < dumphdwindowsC.sql 2> hdwindowsCdumpout.txt
+
+ignore error of: table harddrive already exists.
+
+Size of original hdinit01 plus hdwindowsC should equal size of hdinit.
+
+REPEAT STEPS B THROUGH E FOR ALL LISTS.
+
+HARDDRIVE DB EVALUATION WITH BACKUP DATABASE.
+A. Need 2 backups of everything
+B. HD but no backup
+C. Bkup but no HD
+D. Bkup & HD not on cloud
+E. Reduce redundancy 
+F. All pictures in Pictures 
+G. All video in Video
+H. Videos: hdlist of production, misc. pics, .mp4, .nvc, .kdenlive, HDshort
+I. Backups: bkmd5sum, remove redundancy for pics & video
+J. Scan HD not in Backups - export csv HD
+K. Scan Backup not HD - export csv Backup 
+L. Create list of types not needed: .dll, .exe, .bin, etc.
+
+Eval HD database in Backup database
+items: B. & J.
+
+STEP 1
+create csv with vertical bar separator from harddrive database
+Execute:
+          sqlite3 hdinit.db3  < dump.sql 2> out.txt
+
+where  dump.sql is
+
+    .headers on 
+    .mode csv
+    .separator | 
+    .output hdinit.csv 
+    select * from harddrive;
+    .quit
+
+*************************************************************************
+run program see if exclude; search md5sum; equal: name & size, notate date difference
+
+reads hdinit.csv and calls bkup database to see if it is backed up.
+example:
+./target/release/bkhddbcomp01 bk20240531061717.db3 hdinit.csv exclude.excfile nnnn
+   where nnnn is an optional input to read the hdinit.csv starting at nnnn row
+
+inputs:
+backup db, hd csv, exclude list, starting row (optional)
+
+outputs:
+code, filename, hdref, hddir, hdsize, hddate, hdmd5sum, bkref, bkdir, bkdate
+    more than 1 backup
+    only 1 backup
+    no backup
+    excluded
+
+THE RUNNING OF bkhddbcomp01 WAS VERY SLOW BECAUSE OF THE DATABASE CALLS.
+************************************************************************* 
+
+STEP 2
+ create csv with vertical bar separator from backup database
+Execute:
+
+      sqlite3 bk20240531061717.db3  < dumpdb.sql 2> out.txt
+
+where  dumpdb.sql is
+
+    .headers on 
+    .mode csv
+    .separator | 
+    .output bkfile.csv 
+    select * from blubackup;
+    .quit
+
+STEP 3
+sort the bkfile.csv by the md4sum value high to low so the header is at the top.
+sort --field-separator='|' --key=6r --output=bkfilesorted.csv < bkfile.csv
+
+STEP 4
+sort the hdinit.csv by the md4sum value high to low so the header is at the top.
+sort --field-separator='|' --key=6r --output=hdinitsorted.csv < hdinit.csv
+
+STEP 5
+reads hdinitSORTED.csv and bkhdflatcomp01 to see if it is backed up.
+example:
+./target/release/bkhdflatcomp01 bkfilesorted.csv hdinitsorted.csv exclude.excfile nnnn
+   where nnnn is an optional input to read the hdinitsorted.csv starting at nnnn row
+runs extremely fast.
+inputs:
+sorted backup csv, sorted hd csv, exclude list, starting row (optional)
+
+outputs:
+hdref, filename, hddir, hdsize, hddate, hdmd5sum, line number
+    more than 1 backup
+    only 1 backup
+    no backup
+    excluded
+
+STEP 5
+sort the output by hdref (first column):
+sort --field-separator='|' --key=1 --output=nobkup02sorted.neout < nobkup02.neout
+
+STEP 6 
+create separate files for each hdref.
+
+STEP 7
+COPY HD FILES IN ARE FOR BACKUP
+taking the above hdref files (no backup and only 1 backup)
+and run the RUST-ICED program hdcopy4bkup
+input: no backup or only 1 backup
+output: directory to store copy of file
+
+
+COMPARING CLOUD WITH HARDDRIVE
+Need to run the following terminal commands before using iced program MegaParse
+rclone lsf --files-only -R --csv --format pst /pathofHDdirectory | sort > outputfile1
+but have changed it to not include date (t), because time is off by an hour or minute.
+rclone lsf --files-only -R --csv --format ps /pathofHDdirectory | sort > outputfile1
+(rclone lsf --files-only -R --csv --format ps /media/jp/Myb12tb/MEGA/Video | sort > hdVideo)
+mega-ls -l -r --time-format=ISO6081_WITH_TIME /cloudpathofdirectory > outputfile2
+(mega-ls -l -r --time-format=ISO6081_WITH_TIME /Video > megaVideo)
+iced Run MegaParse
+Run this app using mega outputfile2 as input file
+and the second rclone (without date).
+It will bring up Meld.
+Creates two files: one with datetime and the other without datetime
+Need to run the following terminal command after using MegaParse
+sort targetfile > outputfile3
+compare outputfile1 with outputfile3. I use Meld.
+First compare with out time then try with time.
+
+
+In MEGAcmd source, megacmdexecuter.cpp line 1347 & 1447 change 10 to 11, 
+
+mega-login email  password
+mega-cd Video/Video2022toPresent/Video2023/202310Egypt/pictures
+ mega-rm -r pic20231017
+
+	STEP F2
+		need a program to go through the two databases. Ideally the smaller database as input and search through the other database for filename. Check size, date and md5sum. If md5sum not present output as separate file. And continue. Each will allow 10 locations. If larger, output as other separate file. Location is the reference name plus smd. S for same size. M for same md5sum and d for same date. At least one must exist. If found make sure location does not already exist. Separate locations by comma (,) and smd and location by dash (-)
+
+
+TO SEE IF HD & MEGA MATCH
+with time:
+rclone lsf --files-only -R --csv --format pst /pathofHDdirectory | sort > outputfile1
+
+without time:
+
+rclone lsf --files-only -R --csv --format ps /pathofHDdirectory | sort > outputfile1
+
+  mega-login email password
+   this generates list of files takes awhile.
+   if mega-logout, will remove list of files and login will be regenerated.
+
+  mega-ls -l -r --time-format=ISO6081_WITH_TIME /cloudpathofdirectory > outputfile2"
+
+  Run MegaParse using outputfile2 as input file and targetfile is output
+
+  sort targetfile > outputfile3
+
+  compare outputfile1 with outputfile3. I use Meld (not that good, try old way)
+
+diff outputfile1 outputfile3 > compare.list
+
+make program like megaremove to take those files with “<” and prefix them with: 
+“mega-rm -r “
+
+
+
+
+
+
+
+
+DUPLICATE FILES REMOVAL
+
+Use fclones dry run output.
+fclones group ./testloc > dups.txt
+fclones remove --keep-path '**/rawvideo/**' -o dryex.txt < dups.txt --dry-run 2>dryrun01.txt
+
+Generate mega move from output.
+ format: mega-mv frompath/name topath
+          no output is generated
+          
+Run mega move.
+
+If ok, Run fclones move
+fclones move --keep-path '**/rawvideo/**' -o dryex.txt topath < dups.txt 2>dryrun01.txt
+
+See if HD & MEGA match.
+
+Delete moved files on both HD & MEGA manually.
+ 
