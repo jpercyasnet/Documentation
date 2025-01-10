@@ -255,6 +255,7 @@ and run the RUST-ICED program hdcopy4bkup
 input: no backup or only 1 backup
 output: directory to store copy of file
 
+HARDDRIVE EVALUATION WITH BACKUP DATABASE.
 
 COMPARING CLOUD WITH HARDDRIVE
 Need to run the following terminal commands before using iced program MegaParse
