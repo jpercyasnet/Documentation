@@ -1,0 +1,73 @@
+STEP A 
+ remove new line character \n from end of md5sum (over 1,400,000 entries) in database bk2501a.db3 (copy of bk2501.db3)
+ execute to get list:
+  SELECT md5sum, length(md5sum) as title_length
+  FROM blubackup
+   WHERE length(md5sum) > 32;
+         1418239 rows
+ execute to do removal:
+  UPDATE blubackup
+  SET md5sum=replace(md5sum, CHAR(10), '');
+ write changes.
+
+STEP 1
+  create csv with vertical bar separator from backup database;
+Execute:
+
+      sqlite3 bk2501a.db3  < dumpbk2501a.sql 2> dumpbk2501amess.txt
+
+where  dumpbk2501.sql is
+
+    .headers on 
+    .mode csv
+    .separator | 
+    .output bk2501dump.csv 
+    select * from blubackup;
+    .quit
+
+STEP 2
+the dump file has rows with no md5sum and some have a " as a first character
+need to run 
+./target/release/bkcleanmd5sum bk2501adump.csv
+this creates a file goodout01.excout
+
+STEP 3
+sort the goodout01.excout by the md5sum value high to low so the header is at the top.
+sort --field-separator='|' --key=6r --output=bk202501adumpsorted.csv < goodout01.excout
+
+STEP 4
+run hdbkmd5sum on a harddrive. i.e. Videos.hdlist
+
+STEP 5
+sort the Videos.hdlist by the md5sum value high to low so the header is at the top.
+sort --field-separator='|' --key=6r --output=Videossorted.csv < Videos.hdlist
+
+STEP 6
+create file cattop with data: refname|filename|dirname|filesize|filedate|md5sum|locations|notes
+cat cattop bk202501adumpsorted.csv > bk202501adscat.csv
+create file cattop1 with data: filename|filesize|filedate|dirname|refname|md5sum|locations|notes
+cat cattop1 Videossorted.csv > Videossortedcat.csv
+
+STEP 7
+reads Videossortedcat.csv and bk202501dscat.csv to see if it is backed up.
+example:
+./target/release/bkhdflatcomp01 bk202501dscat.csv Videossortedcat.csv exclude.excfile nnnn
+   where nnnn is an optional input to read the hdinitsorted.csv starting at nnnn row
+runs extremely fast. 300000 files in .1 min. vs. using database takes over 8 min.
+inputs:
+sorted backup csv, sorted hd csv, exclude list, starting row (optional)
+
+outputs:
+hdref, filename, hddir, hdsize, hddate, hdmd5sum, line number
+    more than 1 backup
+    just 1 backup
+    no backup
+    excluded
+
+STEP 8
+COPY HD FILES IN ARE FOR BACKUP
+taking the above hdref files (no backup and just 1 backup)
+review the list  
+and run the RUST-ICED program hdcopy4bkup
+input: no backup
+output: directory to store copy of file
