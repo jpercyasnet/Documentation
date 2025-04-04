@@ -215,6 +215,10 @@ Size of original bkinit01 plus bkyyyymmddnn should equal size of bkinit.
 
 No additional steps since the listings already have the md5sum value.
 
+STEP 13
+upload bk20250331a.db3 to MEGA backup/bklists
+upload exclude.file to github bkhdflatcomp
+
 STOPPED
 --------------------------------------------------------------------------------------
 
