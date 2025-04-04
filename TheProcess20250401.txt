@@ -1,0 +1,220 @@
+STEP 1
+  create csv with vertical bar separator from backup database
+Execute:
+
+      sqlite3 bk20250101a.db3  < dumpbk20250101a.sql 2> dumpbk20250101amess.txt
+
+where  dumpbk20250101a.sql is
+
+    .headers on 
+    .mode csv
+    .separator | 
+    .output bk20250101adump.csv 
+    select * from blubackup;
+    .quit
+
+STEP 2
+sort the bk20250101adump.csv by the md5sum value high to low so the header is at the top.
+sort --field-separator='|' --key=6r --output=bk20250101adumpsorted.csv < bk20250101adump.csv
+
+STEP 3
+create file cattop with data: refname|filename|dirname|filesize|filedate|md5sum|locations|notes
+cat cattop bk20250101adumpsorted.csv > bk20250101adscat.csv
+
+for each hdlist steps A-E
+-----------------------------------------------------------------------------------------------
+STEP A
+Run hdbkmd5sum on a harddrive. i.e. output of Videos.hdlist
+
+STEP B 
+sort the Videos.hdlist by the md5sum value high to low so the header is at the top.
+sort --field-separator='|' --key=6r --output=Videossorted.csv < Videos.hdlist
+
+STEP C
+create file cattop1 with data: filename|filesize|filedate|dirname|refname|md5sum|locations|notes
+cat cattop1 Videossorted.csv > Videossortedcat.csv
+
+STEP D
+reads Videossortedcat.csv and bk202501dscat.csv to see if it is backed up.
+example:
+./target/release/bkhdflatcomp01 bk202501dscat.csv Videossortedcat.csv exclude.excfile nnnn
+   where nnnn is an optional input to read the hdinitsorted.csv starting at nnnn row
+runs extremely fast. 300000 files in .1 min. vs. using database takes over 8 min.
+inputs:
+sorted backup csv, sorted hd csv, exclude list, starting row (optional)
+
+outputs:
+hdref, filename, hddir, hdsize, hddate, hdmd5sum, line number
+    more than 1 backup
+    just 1 backup
+    no backup
+    excluded
+
+STEP E
+COPY HD FILES IN ARE FOR BACKUP
+taking the above hdref files (no backup and just 1 backup)
+review the list  
+and run the RUST-ICED program hdcopy4bkup
+input: no backup
+output: directory to store copy of file
+
+mybook3tb.hdlist
+6tbaJCChurch.hdlist
+6tbaJCold.hdlist
+6tbaJCPictures.hdlist
+6tbamisc.hdlist
+6tbaJCMyDocs.hdlist
+6tbaJChomejp.hdlist
+6tbaJCVideo2020.hdlist
+6tbaJCVideo2021.hdlist
+6tbaJCVideo2022.hdlist
+6tbaJCVideo2023.hdlist
+6tbaJCVideo2024.hdlist
+6tbaJCVideo2025.hdlist
+
+sort --field-separator='|' --key=6r --output=mybook3tbsorted.csv < mybook3tb.hdlist
+cat cattop1 mybook3tbsorted.csv > mybook3tbsortedcat.csv
+./target/release/bkhdflatcomp01 bk20250101adscat.csv mybook3tbsortedcat.csv exclude.excfile
+sort --field-separator='|' --key=3r --output=mybook3tbnobkupsorted.neout < nobkup01.neout
+run hdcopy4bkup with above output to copy files for backup
+
+sort --field-separator='|' --key=6r --output=6tbaJCChurchsorted.csv < 6tbaJCChurch.hdlist
+cat cattop1 6tbaJCChurchsorted.csv > 6tbaJCChurchsortedcat.csv
+./target/release/bkhdflatcomp01 bk20250101adscat.csv 6tbaJCChurchsortedcat.csv exclude.excfile
+
+
+sort --field-separator='|' --key=6r --output=6tbaJColdsorted.csv < 6tbaJCold.hdlist
+cat cattop1 6tbaJColdsorted.csv > 6tbaJColdsortedcat.csv
+./target/release/bkhdflatcomp01 bk20250101adscat.csv 6tbaJColdsortedcat.csv exclude.excfile
+sort --field-separator='|' --key=3r --output=6tbaJColdnobkupsorted.neout < nobkup05.neout
+run hdcopy4bkup with above output to copy files for backup
+
+sort --field-separator='|' --key=6r --output=6tbaJCPicturessorted.csv < 6tbaJCPictures.hdlist
+cat cattop1 6tbaJCPicturessorted.csv > 6tbaJCPicturessortedcat.csv
+./target/release/bkhdflatcomp01 bk20250101adscat.csv 6tbaJCPicturessortedcat.csv exclude.excfile
+sort --field-separator='|' --key=3r --output=6tbaJCPicturesnobkupsorted.neout < nobkup06.neout
+run hdcopy4bkup with above output to copy files for backup
+
+sort --field-separator='|' --key=6r --output=6tbamiscsorted.csv < 6tbamisc.hdlist
+cat cattop1 6tbamiscsorted.csv > 6tbamiscsortedcat.csv
+./target/release/bkhdflatcomp01 bk20250101adscat.csv 6tbamiscsortedcat.csv exclude.excfile
+sort --field-separator='|' --key=3r --output=6tbamiscnobkupsorted.neout < nobkup09.neout
+run hdcopy4bkup with above output to copy files for backup
+
+
+sort --field-separator='|' --key=6r --output=6tbaJCMyDocssorted.csv < 6tbaJCMyDocs.hdlist
+cat cattop1 6tbaJCMyDocssorted.csv > 6tbaJCMyDocssortedcat.csv
+./target/release/bkhdflatcomp01 bk20250101adscat.csv 6tbaJCMyDocssortedcat.csv exclude.excfile
+sort --field-separator='|' --key=3r --output=6tbaJCMyDocsnobkupsorted.neout < nobkup02.neout
+run hdcopy4bkup with above output to copy files for backup
+
+sort --field-separator='|' --key=6r --output=6tbaJChomejpsorted.csv < 6tbaJChomejp.hdlist
+cat cattop1 6tbaJChomejpsorted.csv > 6tbaJChomejpsortedcat.csv
+./target/release/bkhdflatcomp01 bk20250101adscat.csv 6tbaJChomejpsortedcat.csv exclude.excfile
+sort --field-separator='|' --key=3r --output=6tbaJChomejpnobkupsorted.neout < nobkup03.neout
+run hdcopy4bkup with above output to copy files for backup
+
+sort --field-separator='|' --key=6r --output=6tbaJCVideo2020sorted.csv < 6tbaJCVideo2020.hdlist
+cat cattop1 6tbaJCVideo2020sorted.csv > 6tbaJCVideo2020sortedcat.csv
+./target/release/bkhdflatcomp01 bk20250101adscat.csv 6tbaJCVideo2020sortedcat.csv exclude.excfile
+
+sort --field-separator='|' --key=6r --output=6tbaJCVideo2021sorted.csv < 6tbaJCVideo2021.hdlist
+cat cattop1 6tbaJCVideo2021sorted.csv > 6tbaJCVideo2021sortedcat.csv
+./target/release/bkhdflatcomp01 bk20250101adscat.csv 6tbaJCVideo2021sortedcat.csv exclude.excfile
+sort --field-separator='|' --key=3r --output=6tbaJCVideo2021nobkupsorted.neout < nobkup05.neout
+run hdcopy4bkup with above output to copy files for backup
+
+sort --field-separator='|' --key=6r --output=6tbaJCVideo2022sorted.csv < 6tbaJCVideo2022.hdlist
+cat cattop1 6tbaJCVideo2022sorted.csv > 6tbaJCVideo2022sortedcat.csv
+./target/release/bkhdflatcomp01 bk20250101adscat.csv 6tbaJCVideo2022sortedcat.csv exclude.excfile
+sort --field-separator='|' --key=3r --output=6tbaJCVideo2022nobkupsorted.neout < nobkup06.neout
+run hdcopy4bkup with above output to copy files for backup
+
+sort --field-separator='|' --key=6r --output=6tbaJCVideo2023sorted.csv < 6tbaJCVideo2023.hdlist
+cat cattop1 6tbaJCVideo2023sorted.csv > 6tbaJCVideo2023sortedcat.csv
+./target/release/bkhdflatcomp01 bk20250101adscat.csv 6tbaJCVideo2023sortedcat.csv exclude.excfile
+sort --field-separator='|' --key=3r --output=6tbaJCVideo2023nobkupsorted.neout < nobkup07.neout
+run hdcopy4bkup with above output to copy files for backup
+
+sort --field-separator='|' --key=6r --output=6tbaJCVideo2024sorted.csv < 6tbaJCVideo2024.hdlist
+cat cattop1 6tbaJCVideo2024sorted.csv > 6tbaJCVideo2024sortedcat.csv
+./target/release/bkhdflatcomp01 bk20250101adscat.csv 6tbaJCVideo2024sortedcat.csv exclude.excfile
+sort --field-separator='|' --key=3r --output=6tbaJCVideo2024nobkupsorted.neout < nobkup08.neout
+run hdcopy4bkup with above output to copy files for backup
+--------------------------------------------------------------------------------------------------------
+
+STEP 4
+backup files to bluray after removing duplicates
+
+STEP 5 
+copy bluray backup files to optical disks harddrive
+
+STEP 6
+upload to MEGA BKUP20250331
+
+STEP 7
+start running RUST-ICED PROGRAM hdbkmd5sum
+	for each directory bk20250331_  in optical disks harddrive (make sure to check the ignore prefix)
+	the output list is used to update the backup disc database: bk20250331-.list
+
+STEP 8
+create a temporary database using the output list which is combined using
+    cat *.list > combine.merge
+Execute:
+	sqlite3 combine20250331.db3 < import20250331combine.sql 2>combine20250331mess.txt
+
+		where  import20250331ombine.sql is
+
+			CREATE TABLE blubackup (
+				filename  TEXT NOT NULL,
+				filesize INTEGER NOT NULL,
+				filedate TEXT NOT NULL,
+				dirname  TEXT NOT NULL,
+				refname   TEXT NOT NULL,
+				md5sum TEXT,
+				locations TEXT ,
+				notes TEXT ,
+				PRIMARY KEY (refname, filename, dirname, filesize));
+			.separator |
+			.import combine.merge blubackup
+
+STEP 9
+DUMP THE Temporary database(s)
+Execute: 
+
+	sqlite3 combine20250331.db3 .dump > combine20250331dump.sql
+
+STEP 10
+edit combine20250331dump.sql and  do a find
+
+blubackup
+
+and replace all with 
+
+blubackup(filename, filesize, filedate, dirname, refname, md5sum, locations, notes)
+
+because the blubackup order is refname, filename, dirname, filesize, filedate, md5sum, locations, notes
+
+Since the table is already created, you can delete the create table section at the top.
+
+the original database table was defined in a different order.
+
+STEP 11
+make a copy the latest database 
+	Execute:
+
+	cp -p bk20250101a.db3 bk20250331a.db3
+
+STEP 12
+insert files into main db
+	Execute for temporary database created:
+
+	sqlite3 bk20250331a.db3 < combine20250331dump.sql 2> bk20250331updatemess.txt
+
+Size of original bkinit01 plus bkyyyymmddnn should equal size of bkinit.
+
+No additional steps since the listings already have the md5sum value.
+
+STOPPED
+--------------------------------------------------------------------------------------
+
